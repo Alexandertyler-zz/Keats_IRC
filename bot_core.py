@@ -10,91 +10,39 @@ import importlib
 from multiprocess import Process, Pipe
 from multiprocess.connection import Listener, Client
 
-ignore_list = []
-
-def parse_commands(chan, nick, msg):
-    print chan, nick, msg
-
-    if chan == botnick:
-        chan = nick
-
-    if nick in ignore_list:
-        return
-
-    if msg == '.help':
-        print_help(nick)
-    
-    if msg.startswith(".ignore"):
-        if nick == 'alex':
-            user = msg.split('.ignore ')[1]
-            ignore(chan, user)
-
-    if msg.startswith(".poll"):
-        poll(chan, nick, msg)
-
-
-def ignore(chan, user):
-    if not user in ignore_list:
-        ignore_list.append(user)
-    ircsock.send("PRIVMSG " + chan + " :Due to high levels of spam in the vicinity, " + user + " will be ignored\n") 
-
+#ignore_list = []
+#
+#
+#def parse_commands(chan, nick, msg):
+#    print chan, nick, msg
+#
+#    if chan == botnick:
+#        chan = nick
+#
+#    if nick in ignore_list:
+#        return
+#
+#    if msg == '.help':
+#        print_help(nick)
+#    
+#    if msg.startswith(".ignore"):
+#        if nick == 'alex':
+#            user = msg.split('.ignore ')[1]
+#            ignore(chan, user)
+#
+#    if msg.startswith(".poll"):
+#        poll(chan, nick, msg)
+#
+#
+#def ignore(chan, user):
+#    if not user in ignore_list:
+#        ignore_list.append(user)
+#    ircsock.send("PRIVMSG " + chan + " :Due to high levels of spam in the vicinity, " + user + " will be ignored\n") 
+#
+#
 
 def joinchannel(ircsock, chan):
     ircsock.send("JOIN  " + chan + "\n")
-
-def poll(base_chan, nick, msg):
-    poll_values = msg.split(".poll ")
-    ircsock.send("PRIVMSG " + base_chan + " :" + nick + " has started a poll. Use .vote to submit your opinion. Poll will be open for one minute. Topic - '" + poll_values[1] + "'\n")
-
-    start = time.time()
-    poll_results = {}
-    voters = []
-    ircsock.settimeout(3)
-    while 1:
-        try: 
-            if (time.time()-start) >= 60:
-                break
-            
-            ircmsg = ircsock.recv(2048)
-            ircmsg = ircmsg.strip('\n\r')
-    
-            if ircmsg.find("PING :") != -1:
-                response = ircmsg.split("PING ")[1]
-                ping(response)
-
-            if ircmsg.find(' PRIVMSG ') != 1:
-                chan = ircmsg.split(' PRIVMSG ')[-1].split(' :')[0]
-                nick = ircmsg.split('!')[0][1:]
-                msg = ircmsg.split(' PRIVMSG ')[-1].split(' :')[1]
-                print chan, nick, msg 
-                poll_results, voters = parse_votes(chan, nick, msg, poll_results, voters)
-        except:
-            if (time.time()-start) >= 60:
-                break
-
-    ircsock.settimeout(None)
-    ircsock.send("PRIVMSG " + chan + " :Thanks for voting! Here are your results:\n")
-
-    for entry in poll_results:
-        ircsock.send("PRIVMSG " + base_chan + " :    " + entry + " ~ " + str(poll_results[entry]) + "\n")
-
-def parse_votes(chan, nick, msg, poll_results, voters):
-    if msg == ".kill":
-        suicide(chan)
-
-    if msg.startswith(".vote"):
-        if nick not in voters:
-            option = msg.split(".vote ")[1]
-            if option.lower() in poll_results:
-                poll_results[option.lower()] += 1
-            else:
-                poll_results[option.lower()] = 1
-            voters.append(nick)
-        else:
-            ircsock.send("PRIVMSG " + nick + " :You can only vote once per poll\n")
-
-    return poll_results, voters
-
     
 def verify(ircsock):
     waiting_to_verify = True
