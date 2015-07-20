@@ -217,8 +217,9 @@ def irc_loop(ircsock, bot_nick, channel, client):
                     if valid_irc:
                         module = getattr(__import__('irc_commands'),  valid_irc)
                         module.action(ircsock, channel, nick, msg)
-
+            time.sleep(0.2)
         except:
+            time.sleep(0.2)
             continue
 
 
@@ -243,7 +244,7 @@ def shell_loop(ircsock, channel, listener):
             module = getattr(__import__('shell_commands'), valid)
             module.action(connection)
 
-        #connection.send('test')
+        time.sleep(0.2)
         
 
 
