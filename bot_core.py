@@ -134,15 +134,19 @@ def irc_loop(ircsock, bot_nick, channel, client):
         #check for console commands
         if client.poll():
             shell_command = client.recv()
+            shell_command = shell_command.split(':')
             
-            if shell_command == 'reload':
+            if shell_command[0] == 'reload':
                 irc_dict = load_irc_commands(irc_dict, reload_commands=True)
                 continue 
             
-            valid_shell = irc_dict.get(shell_command)
+            valid_shell = irc_dict.get(shell_command[0])
             if valid_shell:
                 module = getattr(__import__('irc_commands'), valid_shell)
-                module.action(ircsock, channel, 'shell', '')
+                try:
+                    module.action(ircsock, channel, 'shell', shell_command[1])
+                except IndexError:
+                    module.action(ircsock, channel, 'shell', '')
 
         try:
             ircmsg = ircsock.recv(2048)
@@ -180,17 +184,21 @@ def shell_loop(ircsock, channel, listener):
     shell_dict = load_shell_commands({})
 
     while 1:
-        command = raw_input('irc_bot: ') 
+        command = raw_input('irc_bot: ')
+        command = command.split(':')
 
-        if command == 'reload':
+        if command[0] == 'reload':
             connection.send('reload')
             shell_dict = load_shell_commands(shell_dict, reload_commands=True)
             continue
         
-        valid = shell_dict.get(command)
+        valid = shell_dict.get(command[0])
         if valid:
             module = getattr(__import__('shell_commands'), valid)
-            module.action(connection)
+            try:
+                module.action(connection, command[1])
+            except IndexError:
+                module.action(connection, '')
 
         time.sleep(0.2)
         

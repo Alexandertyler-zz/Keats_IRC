@@ -24,3 +24,7 @@ commas please
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. 
 some phreaking long distance
 help
+“overheard at norse”
+logging to a websocket
+alfred locator, possibly some sort of beacon/rfid tool for finding where he is at any time
+user review
