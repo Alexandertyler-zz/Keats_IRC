@@ -1,4 +1,4 @@
-# Technocore_irc
+# Keats_IRC
 
 If you have any questions, feel free to email me at alexanderhtyler@gmail.com
 
